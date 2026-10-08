@@ -51,6 +51,16 @@ saveharbor verify "C:\Users\me\AppData\Local\SaveHarbor\backups\Example-Game\202
 
 The default data folder is `%LOCALAPPDATA%\SaveHarbor` on Windows. It contains `profiles.json` and `backups/`. The GUI's **Backup folder** button opens the archive location.
 
+## ☕ Support / Pro Version
+
+The core application is free and open source under MIT. **SaveHarbor Pro Scheduler** is an optional 50 ₽ add-on with daily Windows Task Scheduler runs, multi-profile configuration, SHA-256 verification, logs, and configurable snapshot retention. [Get the Pro pack on Boosty](https://boosty.to/azizazimov/posts/a9829848-7552-4b9b-8e52-e6086e81765f).
+
+Support the project on [Boosty](https://boosty.to/azizazimov), or send only the matching asset on its correct network:
+
+- Bitcoin: `bc1qn75pj4n7gyl2k5kf2f97elvyenz52q6nn2g30u`
+- TRON: `TCBSy38X57hA6w2onJcxom24x1febc1mP1`
+- BNB Smart Chain: `0xD431a917961E0b086B96D9F72b5C8fF19b19068a`
+
 ## Restore behavior
 
 Restore verifies the archive, stages its files, checks their hashes, then overlays the snapshot into the selected save folder. Files at matching paths are replaced; files that are absent from the snapshot are left in place. Before applying the restore, SaveHarbor creates a safety snapshot of the current folder. This makes restore conservative and recoverable, but it is not a full folder rollback.
