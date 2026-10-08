@@ -1,0 +1,10 @@
+{
+  "Python": "C:\\Users\\YOUR-NAME\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+  "Profiles": [
+    {
+      "Name": "Example Game",
+      "Folder": "%USERPROFILE%\\Documents\\My Games\\Example Game",
+      "KeepLast": 30
+    }
+  ]
+}

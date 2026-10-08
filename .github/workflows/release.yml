@@ -1,0 +1,31 @@
+name: Build release archive
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: write
+
+jobs:
+  package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Build portable source bundle
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}".TrimStart("v")
+          $stage = Join-Path $env:RUNNER_TEMP "SaveHarbor-v$version"
+          New-Item -ItemType Directory -Path $stage | Out-Null
+          Copy-Item README.md, LICENSE, CHANGELOG.md, run-saveharbor.bat, pyproject.toml -Destination $stage
+          Copy-Item saveharbor, docs -Destination $stage -Recurse
+          Compress-Archive -Path (Join-Path $stage "*") -DestinationPath "SaveHarbor-v$version.zip"
+          Get-FileHash "SaveHarbor-v$version.zip" -Algorithm SHA256 | ForEach-Object { "$($_.Hash.ToLower())  $($_.Path | Split-Path -Leaf)" } | Set-Content "SaveHarbor-v$version.sha256"
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" "SaveHarbor-${{ github.ref_name }}.zip" "SaveHarbor-${{ github.ref_name }}.sha256" --generate-notes
