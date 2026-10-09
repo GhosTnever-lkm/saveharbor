@@ -99,11 +99,16 @@ def _hash_archive(path: Path) -> str:
 def create_snapshot(source: Path, profile_name: str, backup_root: Path) -> SnapshotResult:
     source = source.resolve(strict=True)
     files = list(_walk_files(source))
-    created = datetime.now(timezone.utc).replace(microsecond=0).isoformat()
-    stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    now = datetime.now(timezone.utc)
+    created = now.replace(microsecond=0).isoformat()
+    stamp = now.strftime("%Y%m%dT%H%M%S%fZ")
     profile_dir = backup_root / _safe_profile_slug(profile_name)
     profile_dir.mkdir(parents=True, exist_ok=True)
     target = profile_dir / f"{stamp}.saveharbor.zip"
+    collision = 1
+    while target.exists():
+        target = profile_dir / f"{stamp}-{collision}.saveharbor.zip"
+        collision += 1
     manifest_files = []
     total = 0
     fd, temp_name = tempfile.mkstemp(prefix=".saveharbor-", suffix=".tmp", dir=profile_dir)

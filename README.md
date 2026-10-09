@@ -17,7 +17,7 @@
 ## Quick start on Windows
 
 1. Install [Python 3.11 or newer](https://www.python.org/downloads/windows/) and enable **Add python.exe to PATH** in the installer.
-2. Download `SaveHarbor-v1.0.1.zip` from [Releases](https://github.com/GhosTnever-lkm/saveharbor/releases).
+2. Download `SaveHarbor-v1.0.2.zip` from [Releases](https://github.com/GhosTnever-lkm/saveharbor/releases/latest).
 3. Extract the ZIP, open its folder in File Explorer, and run `run-saveharbor.bat`.
 4. Choose **Add save folder** and select the game's actual save directory. Save locations vary by game; see [the guide](docs/USER-GUIDE.md).
 5. Select the profile and create your first snapshot.

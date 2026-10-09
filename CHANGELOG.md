@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.2 - 2026-10-10
+
+- Replace the incomplete v1.0.1 download with a complete source bundle that includes the regression suite.
+- Confirm the release archive runs the same regression suite as CI.
+- Prevent snapshots created within the same timestamp tick from overwriting one another.
+- Add a deterministic regression test for same-timestamp snapshots.
+
 ## 1.0.1 - 2026-10-10
 
 - Add eight regression tests for snapshot creation, verification, comparison, restoration, and invalid archives.

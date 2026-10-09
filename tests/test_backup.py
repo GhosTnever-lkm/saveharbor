@@ -4,7 +4,9 @@ import json
 import tempfile
 import unittest
 import zipfile
+from datetime import datetime, timezone
 from pathlib import Path
+from unittest.mock import patch
 
 from saveharbor.backup import (
     SnapshotError,
@@ -54,11 +56,16 @@ class SnapshotWorkflowTests(unittest.TestCase):
         self.assertEqual(len(restored.files), 2)
 
     def test_compare_reports_added_removed_changed_and_unchanged(self) -> None:
-        left = create_snapshot(self.source, "Example Game", self.backups)
-        (self.source / "slot1.sav").write_bytes(b"changed-save")
-        (self.source / "settings" / "config.ini").unlink()
-        (self.source / "new.sav").write_bytes(b"new")
-        right = create_snapshot(self.source, "Example Game", self.backups)
+        fixed_time = datetime(2026, 10, 10, 12, 0, tzinfo=timezone.utc)
+        with patch("saveharbor.backup.datetime") as mocked_datetime:
+            mocked_datetime.now.return_value = fixed_time
+            left = create_snapshot(self.source, "Example Game", self.backups)
+            (self.source / "slot1.sav").write_bytes(b"changed-save")
+            (self.source / "settings" / "config.ini").unlink()
+            (self.source / "new.sav").write_bytes(b"new")
+            right = create_snapshot(self.source, "Example Game", self.backups)
+
+        self.assertNotEqual(left.archive, right.archive)
 
         comparison = compare_snapshots(
             inspect_snapshot(left.archive, verify_files=True),
@@ -71,6 +78,17 @@ class SnapshotWorkflowTests(unittest.TestCase):
             "changed": ["slot1.sav"],
             "unchanged": [],
         })
+
+    def test_same_timestamp_snapshots_get_distinct_archive_names(self) -> None:
+        fixed_time = datetime(2026, 10, 10, 12, 0, tzinfo=timezone.utc)
+        with patch("saveharbor.backup.datetime") as mocked_datetime:
+            mocked_datetime.now.return_value = fixed_time
+            first = create_snapshot(self.source, "Example Game", self.backups)
+            second = create_snapshot(self.source, "Example Game", self.backups)
+
+        self.assertNotEqual(first.archive, second.archive)
+        self.assertTrue(first.archive.is_file())
+        self.assertTrue(second.archive.is_file())
 
     def test_verification_rejects_changed_snapshot_file(self) -> None:
         created = create_snapshot(self.source, "Example Game", self.backups)
