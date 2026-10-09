@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "saveharbor"
-version = "1.0.0"
+version = "1.0.1"
 description = "Local-first, checksum-verified backup manager for PC game saves"
 readme = "README.md"
 requires-python = ">=3.11"

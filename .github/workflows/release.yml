@@ -15,6 +15,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+      - name: Run regression tests
+        run: |
+          python -m unittest discover -s tests -v
+          python -m compileall -q saveharbor tests
+          python -m saveharbor --version
       - name: Build portable source bundle
         shell: pwsh
         run: |
@@ -22,7 +27,7 @@ jobs:
           $stage = Join-Path $env:RUNNER_TEMP "SaveHarbor-v$version"
           New-Item -ItemType Directory -Path $stage | Out-Null
           Copy-Item README.md, LICENSE, CHANGELOG.md, run-saveharbor.bat, pyproject.toml -Destination $stage
-          Copy-Item saveharbor, docs -Destination $stage -Recurse
+          Copy-Item saveharbor, docs, tests -Destination $stage -Recurse
           Compress-Archive -Path (Join-Path $stage "*") -DestinationPath "SaveHarbor-v$version.zip"
           Get-FileHash "SaveHarbor-v$version.zip" -Algorithm SHA256 | ForEach-Object { "$($_.Hash.ToLower())  $($_.Path | Split-Path -Leaf)" } | Set-Content "SaveHarbor-v$version.sha256"
       - name: Create GitHub release
