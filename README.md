@@ -9,6 +9,7 @@
 - Organizes save folders into named game profiles.
 - Creates portable ZIP snapshots with a JSON manifest and per-file SHA-256 hashes.
 - Compares two snapshots and lists added, removed, changed, and unchanged files.
+- Compares two live folders before backup and lists added, removed, changed, and unchanged files; supports JSON output for scripts.
 - Verifies a snapshot before restore and checks hashes again after staging its files.
 - Creates a safety snapshot before the app restores files.
 - Rejects unsafe archive paths, duplicate entries, unexpected files, oversized snapshots, and unsupported formats.
@@ -47,6 +48,12 @@ saveharbor backup "C:\Users\me\Documents\My Games\Example" "Example Game"
 
 # Verify the manifest and every saved file's SHA-256 hash
 saveharbor verify "C:\Users\me\AppData\Local\SaveHarbor\backups\Example-Game\20261008T120000Z.saveharbor.zip"
+
+# Compare folders without changing either one
+saveharbor compare-folders "D:\Saves\Before" "D:\Saves\After"
+
+# Get machine-readable output
+saveharbor compare-folders "D:\Saves\Before" "D:\Saves\After" --json
 ```
 
 The default data folder is `%LOCALAPPDATA%\SaveHarbor` on Windows. It contains `profiles.json` and `backups/`. The GUI's **Backup folder** button opens the archive location.

@@ -11,6 +11,7 @@ from unittest.mock import patch
 from saveharbor.backup import (
     SnapshotError,
     compare_snapshots,
+    compare_folders,
     create_snapshot,
     inspect_snapshot,
     restore_snapshot,
@@ -146,6 +147,40 @@ class SnapshotWorkflowTests(unittest.TestCase):
 
         self.assertEqual(result.file_count, 0)
         self.assertEqual(snapshot.files, {})
+
+    def test_compare_folders_reports_added_removed_changed_and_unchanged(self) -> None:
+        other = self.root / "other-saves"
+        other.mkdir()
+        (other / "slot1.sav").write_bytes(b"save-one")
+        (other / "new.sav").write_bytes(b"new-save")
+        (other / "settings").mkdir()
+        (other / "settings" / "config.ini").write_bytes(b"difficulty=hard\n")
+
+        self.assertEqual(compare_folders(self.source, other), {
+            "added": ["new.sav"],
+            "removed": [],
+            "changed": ["settings/config.ini"],
+            "unchanged": ["slot1.sav"],
+        })
+
+    def test_compare_folders_uses_content_hash_for_equal_size_files(self) -> None:
+        other = self.root / "other-saves"
+        other.mkdir()
+        (other / "slot1.sav").write_bytes(b"SAVE-one")
+        (other / "settings").mkdir()
+        (other / "settings" / "config.ini").write_bytes(b"difficulty=normal\n")
+
+        comparison = compare_folders(self.source, other)
+
+        self.assertEqual(comparison["changed"], ["slot1.sav"])
+
+    def test_compare_folders_rejects_same_folder(self) -> None:
+        with self.assertRaisesRegex(SnapshotError, "two different folders"):
+            compare_folders(self.source, self.source)
+
+    def test_compare_folders_rejects_missing_input(self) -> None:
+        with self.assertRaises(FileNotFoundError):
+            compare_folders(self.source, self.root / "missing")
 
 
 if __name__ == "__main__":

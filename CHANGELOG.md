@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.0 - 2026-10-10
+
+- Compare two live folders by relative path and SHA-256 without changing either folder.
+- Print a readable report or JSON for added, removed, changed, and unchanged files.
+- Add regression tests for comparison output, equal-size content changes, identical paths, and missing input.
+
 ## 1.0.2 - 2026-10-10
 
 - Replace the incomplete v1.0.1 download with a complete source bundle that includes the regression suite.

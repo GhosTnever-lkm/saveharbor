@@ -270,3 +270,37 @@ def compare_snapshots(left: Snapshot, right: Snapshot) -> dict[str, list[str]]:
         "changed": sorted(path for path in left_paths & right_paths if left.files[path].sha256 != right.files[path].sha256),
         "unchanged": sorted(path for path in left_paths & right_paths if left.files[path].sha256 == right.files[path].sha256),
     }
+
+
+def compare_folders(left_root: Path, right_root: Path) -> dict[str, list[str]]:
+    """Compare two live folders by relative path, size, and SHA-256 content."""
+    left_root = left_root.resolve(strict=True)
+    right_root = right_root.resolve(strict=True)
+    if not left_root.is_dir() or not right_root.is_dir():
+        raise SnapshotError("Both folder comparison inputs must be folders.")
+    if left_root == right_root:
+        raise SnapshotError("Choose two different folders to compare.")
+
+    def inventory(root: Path) -> dict[str, FileRecord]:
+        result: dict[str, FileRecord] = {}
+        for path, relative in _walk_files(root):
+            try:
+                size = path.stat().st_size
+                digest = _sha256_file(path)
+            except OSError as exc:
+                raise SnapshotError(f"Could not compare {relative}: {exc}") from exc
+            result[relative] = FileRecord(relative, size, digest)
+        return result
+
+    left, right = inventory(left_root), inventory(right_root)
+    left_paths, right_paths = set(left), set(right)
+    changed = sorted(
+        path for path in left_paths & right_paths
+        if left[path].size != right[path].size or left[path].sha256 != right[path].sha256
+    )
+    return {
+        "added": sorted(right_paths - left_paths),
+        "removed": sorted(left_paths - right_paths),
+        "changed": changed,
+        "unchanged": sorted((left_paths & right_paths) - set(changed)),
+    }
