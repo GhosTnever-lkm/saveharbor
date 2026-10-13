@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.1.1 - 2026-10-13
+
+- Reject snapshot manifests with file paths that collide on case-insensitive filesystems before any restore writes occur.
+- Add a regression case proving a rejected archive leaves the destination files unchanged.
+
 ## 1.1.0 - 2026-10-10
 
 - Compare two live folders by relative path and SHA-256 without changing either folder.
