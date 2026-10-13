@@ -11,6 +11,7 @@
 - Compares two snapshots and lists added, removed, changed, and unchanged files.
 - Compares two live folders before backup and lists added, removed, changed, and unchanged files; supports JSON output for scripts.
 - Verifies a snapshot before restore and checks hashes again after staging its files.
+- Rejects file paths that differ only by letter case, so portable snapshots cannot overwrite one another on Windows.
 - Creates a safety snapshot before the app restores files.
 - Rejects unsafe archive paths, duplicate entries, unexpected files, oversized snapshots, and unsupported formats.
 - Offers both a graphical desktop app and a small command-line interface.
@@ -18,7 +19,7 @@
 ## Quick start on Windows
 
 1. Install [Python 3.11 or newer](https://www.python.org/downloads/windows/) and enable **Add python.exe to PATH** in the installer.
-2. Download `SaveHarbor-v1.1.0.zip` from the [latest release](https://github.com/GhosTnever-lkm/saveharbor/releases/latest).
+2. Download `SaveHarbor-v1.1.1.zip` from the [latest release](https://github.com/GhosTnever-lkm/saveharbor/releases/latest).
 3. Extract the ZIP, open its folder in File Explorer, and run `run-saveharbor.bat`.
 4. Choose **Add save folder** and select the game's actual save directory. Save locations vary by game; see [the guide](docs/USER-GUIDE.md).
 5. Select the profile and create your first snapshot.

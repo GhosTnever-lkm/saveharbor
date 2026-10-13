@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import tempfile
 import unittest
@@ -55,6 +56,41 @@ class SnapshotWorkflowTests(unittest.TestCase):
         self.assertEqual((destination / "settings" / "config.ini").read_text(encoding="utf-8"), "difficulty=normal\n")
         self.assertEqual((destination / "keep.txt").read_text(encoding="utf-8"), "keep")
         self.assertEqual(len(restored.files), 2)
+
+    def test_restore_rejects_case_only_paths_before_changing_destination(self) -> None:
+        archive = self.root / "case-collision.saveharbor.zip"
+        payloads = {"save.sav": b"first-save", "SAVE.sav": b"second-save"}
+        manifest = {
+            "format": "saveharbor-snapshot",
+            "format_version": 1,
+            "profile_name": "Example Game",
+            "created_at": "2026-10-13T00:00:00+00:00",
+            "files": [
+                {
+                    "path": name,
+                    "size": len(data),
+                    "sha256": hashlib.sha256(data).hexdigest(),
+                }
+                for name, data in payloads.items()
+            ],
+        }
+        with zipfile.ZipFile(archive, "w") as output:
+            output.writestr("manifest.json", json.dumps(manifest))
+            for name, data in payloads.items():
+                output.writestr(f"files/{name}", data)
+
+        destination = self.root / "restore-destination"
+        destination.mkdir()
+        existing_save = destination / "save.sav"
+        existing_save.write_bytes(b"keep-current-save")
+        (destination / "keep.txt").write_text("keep", encoding="utf-8")
+
+        with self.assertRaisesRegex(SnapshotError, "case-insensitive filesystems"):
+            restore_snapshot(archive, destination)
+
+        self.assertEqual(existing_save.read_bytes(), b"keep-current-save")
+        self.assertEqual((destination / "keep.txt").read_text(encoding="utf-8"), "keep")
+        self.assertEqual(sorted(path.name for path in destination.iterdir()), ["keep.txt", "save.sav"])
 
     def test_compare_reports_added_removed_changed_and_unchanged(self) -> None:
         fixed_time = datetime(2026, 10, 10, 12, 0, tzinfo=timezone.utc)

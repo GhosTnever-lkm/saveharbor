@@ -187,6 +187,7 @@ def inspect_snapshot(archive_path: Path, verify_files: bool = False, calculate_a
             if not isinstance(profile_name, str) or not isinstance(created_at, str) or not isinstance(rows, list):
                 raise SnapshotError("Snapshot manifest is incomplete.")
             file_records: dict[str, FileRecord] = {}
+            casefolded_paths: set[str] = set()
             total = 0
             expected_names = {"manifest.json"}
             for row in rows:
@@ -195,7 +196,13 @@ def inspect_snapshot(archive_path: Path, verify_files: bool = False, calculate_a
                 relative = _validated_relative_path(row.get("path"))
                 size = row.get("size")
                 digest = row.get("sha256")
-                if relative in file_records or not isinstance(size, int) or size < 0 or size > MAX_FILE_BYTES:
+                if relative in file_records:
+                    raise SnapshotError("Snapshot manifest contains a duplicate or invalid file record.")
+                folded = relative.casefold()
+                if folded in casefolded_paths:
+                    raise SnapshotError("Snapshot contains file paths that collide on case-insensitive filesystems.")
+                casefolded_paths.add(folded)
+                if not isinstance(size, int) or size < 0 or size > MAX_FILE_BYTES:
                     raise SnapshotError("Snapshot manifest contains a duplicate or invalid file record.")
                 if not isinstance(digest, str) or not re.fullmatch(r"[a-f0-9]{64}", digest):
                     raise SnapshotError("Snapshot manifest contains an invalid SHA-256 value.")
