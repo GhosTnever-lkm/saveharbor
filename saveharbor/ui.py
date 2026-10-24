@@ -10,6 +10,10 @@ from .backup import SnapshotError, compare_snapshots, create_snapshot, inspect_s
 from .storage import app_data_dir, load_profiles, save_profiles
 
 
+def history_hash_label(digest: str) -> str:
+    return digest[:20] + "…" if digest else "Не вычислен"
+
+
 class SaveHarborApp:
     def __init__(self, root: tk.Tk):
         self.root = root
@@ -141,7 +145,7 @@ class SaveHarborApp:
             try:
                 snapshot = inspect_snapshot(archive, calculate_archive_hash=False)
                 self.snapshots.append(archive)
-                self.history.insert("", "end", iid=str(len(self.snapshots) - 1), values=(snapshot.created_at.replace("T", " "), len(snapshot.files), self._size(snapshot.total_bytes), snapshot.archive_sha256[:20] + "…"))
+                self.history.insert("", "end", iid=str(len(self.snapshots) - 1), values=(snapshot.created_at.replace("T", " "), len(snapshot.files), self._size(snapshot.total_bytes), history_hash_label(snapshot.archive_sha256)))
             except SnapshotError:
                 self.history.insert("", "end", values=(archive.name, "не проверен", "—", "архив повреждён или неподдерживаемый"))
 
@@ -279,10 +283,21 @@ class SaveHarborApp:
         self._run_background("Проверяю снимок, сохраняю текущее состояние и восстанавливаю файлы…", restore, completed, failed)
 
     def _verify(self) -> None:
+        selected = self.history.selection()
         paths = self._selected_archives(1)
         if not paths:
             return
+        selected_item = selected[0]
         def completed(snapshot) -> None:
+            if selected_item in self.history.get_children():
+                try:
+                    index = int(selected_item)
+                    if self.snapshots[index] == paths[0]:
+                        values = list(self.history.item(selected_item, "values"))
+                        values[3] = history_hash_label(snapshot.archive_sha256)
+                        self.history.item(selected_item, values=values)
+                except (ValueError, IndexError):
+                    pass
             self.status.set(f"Проверка пройдена: {len(snapshot.files)} файлов совпадают с манифестом. SHA-256 архива: {snapshot.archive_sha256}")
             messagebox.showinfo("Проверка завершена", f"Все {len(snapshot.files)} файлов прошли SHA-256 проверку.\n\nSHA-256 архива:\n{snapshot.archive_sha256}")
         def failed(exc) -> None:
