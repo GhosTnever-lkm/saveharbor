@@ -17,7 +17,7 @@ These are examples, not universal paths. Check the game's documentation or searc
 1. Start SaveHarbor and click **Add save folder**.
 2. Select the game's save folder and give the profile a recognizable name.
 3. Select the profile and click **Create snapshot**.
-4. The history shows the timestamp, file count, uncompressed size, and the beginning of the archive SHA-256.
+4. The history shows the timestamp, file count, and uncompressed size. The archive SHA-256 column says **Не вычислен** until you run **Verify SHA-256**; a verified archive then shows the beginning of its hash.
 
 Snapshots are stored under `%LOCALAPPDATA%\SaveHarbor\backups\<profile>\`. Use **Backup folder** to open the location. You can copy a `.saveharbor.zip` to another disk; its manifest travels with it.
 

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.1.2 - 2026-10-24
+
+- Show an explicit "not computed" label for archive SHA-256 values skipped during history loading.
+- Update the history row with the real hash prefix after successful verification, without hashing large archives on the UI thread.
+- Document the on-demand hash behavior and add regression coverage for hash labels.
+
 ## 1.1.1 - 2026-10-13
 
 - Reject snapshot manifests with file paths that collide on case-insensitive filesystems before any restore writes occur.
